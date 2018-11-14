@@ -1,15 +1,19 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: cpp
 
 addons:
   apt:
     packages:
-      - libxml++2.6-dev
       - libarchive-dev
+
+before_install:
+  - wget http://mirrors.kernel.org/ubuntu/pool/universe/p/pugixml/libpugixml-dev_1.8.1-7_amd64.deb
+  - wget http://mirrors.kernel.org/ubuntu/pool/universe/p/pugixml/libpugixml1v5_1.8.1-7_amd64.deb
+  - sudo dpkg -i *.deb
 
 script:
   - autoreconf -fi
-  - ./configure --disable-static --enable-zhfst
+  - ./configure --enable-zhfst || { cat config.log && exit 1; }
   - make -j3
-  - make -j1 check
+  - make -j1 check || { cat test-suite.log && exit 1; }
